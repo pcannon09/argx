@@ -1,0 +1,18 @@
+# Private
+.private/*
+!.private/project.json
+
+# Tmp
+*.tmp
+*.swp
+*.bak
+
+tmp/
+.cache/
+
+# Generated files
+build/
+docs/
+
+# OS
+.DS_STORE

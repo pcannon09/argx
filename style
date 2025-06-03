@@ -1,0 +1,11 @@
+--- HELP ---------------
+ID: id
+[ -h | --help [ version | help] ] Info about help
+              [ version ]       ] Info about version
+              [ help ]          ] Info about version
+
+ID: version
+[ -V | --version ] Version information
+
+-----------------------
+
