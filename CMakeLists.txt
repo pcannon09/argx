@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
-# Read metadata
-file(READ ".private/project.json" projectInfo)
+# Read project metadata
+file(READ "${CMAKE_SOURCE_DIR}/.private/project.json" projectInfo)
 string(JSON projectName GET "${projectInfo}" exeName)
 string(JSON projectVersion GET "${projectInfo}" version)
 string(JSON projectVersionState GET "${projectInfo}" versionState)
@@ -10,70 +10,102 @@ string(JSON projectVersionSTD GET "${projectInfo}" versionSTD)
 set(VERSION "${projectVersion} ${versionState}")
 set(STD_VERSION "${projectVersionSTD}")
 
-project(${projectName} VERSION ${projectVersion})
+project(${projectName} VERSION ${projectVersion} LANGUAGES CXX)
 
-# Compiler flags
-set(programFlags
-	-fsanitize=address
-    -g
-    -Wunused
-    -Wall
-)
-
-set(programLinkFlags
-	-fsanitize=address
-    -g
-)
-
-set(CPP_STD 11)
-
-set(CMAKE_COLOR_DIAGNOSTICS ON)
-set(CMAKE_CXX_STANDARD ${CPP_STD})
+# Use C++11 standard
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_COLOR_DIAGNOSTICS ON)
 
-# Link exec if only changed
+# Enable policy for install RPATH handling (CMP0147)
 cmake_policy(SET CMP0147 NEW)
 
-# Show build config info
-message(WARNING "CXX Compiler: ${CMAKE_CXX_COMPILER}")
-message(STATUS  "${projectName} version: ${VERSION}")
-message(STATUS  "Standard version: ${STD_VERSION}")
-
-# Directory setup
+# Directories
 set(srcDir "${CMAKE_SOURCE_DIR}/src")
-set(testsDir "${CMAKE_SOURCE_DIR}/tests")
 set(incDir "${CMAKE_SOURCE_DIR}/inc")
-set(vendorDir "${CMAKE_SOURCE_DIR}/vendor")
+set(testsDir "${CMAKE_SOURCE_DIR}/tests")
 
 # Project files
 set(headers
     ${incDir}/macros.hpp
     ${incDir}/types.hpp
-
     ${incDir}/Argx.hpp
     ${incDir}/ARGXAddError.hpp
 )
 
 set(sources
-    ${testsDir}/main.cpp
-
     ${srcDir}/Argx.cpp
     ${srcDir}/ARGXAddError.cpp
 )
 
-# Build the main executable
-add_executable(${projectName}
-    ${sources}
-    ${headers}
+# Build static library
+add_library(${projectName}_static STATIC ${sources} ${headers})
+target_include_directories(${projectName}_static
+  PUBLIC
+    $<BUILD_INTERFACE:${incDir}>
+    $<INSTALL_INTERFACE:include>
 )
 
-target_compile_options(${projectName} PRIVATE ${programFlags})
-target_link_options(${projectName} PRIVATE ${programLinkFlags})
+# Build shared library
+add_library(${projectName}_shared SHARED ${sources} ${headers})
+target_include_directories(${projectName}_shared
+  PUBLIC
+    $<BUILD_INTERFACE:${incDir}>
+    $<INSTALL_INTERFACE:include>
+)
 
+# Build executable linking to shared library
+add_executable(${projectName} ${testsDir}/main.cpp)
+target_link_libraries(${projectName} PRIVATE ${projectName}_shared)
+target_include_directories(${projectName}
+  PRIVATE
+    ${incDir}
+)
+
+# Compiler and linker flags per target
+foreach(tgt IN ITEMS ${projectName}_static ${projectName}_shared ${projectName})
+  target_compile_options(${tgt} PRIVATE
+    $<$<CONFIG:DEBUG>:-g;-Og;-Wall;-Wextra;-Wpedantic;-fsanitize=address>
+    $<$<CONFIG:RELEASE>:-O3;-march=native;-DNDEBUG>
+  )
+  target_link_options(${tgt} PRIVATE
+    $<$<CONFIG:DEBUG>:-fsanitize=address>
+  )
+endforeach()
+
+# Output directory for binaries
 set_target_properties(${projectName} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+  RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+)
+
+# Install rules
+install(TARGETS ${projectName}_static ${projectName}_shared ${projectName}
+  EXPORT ${projectName}Targets
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
+
+install(DIRECTORY ${incDir}/ DESTINATION include)
+
+# Generate and install export config files
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+  "${CMAKE_SOURCE_DIR}/cmake/Config.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/${projectName}Config.cmake"
+  INSTALL_DESTINATION lib/cmake/${projectName}
+)
+
+install(EXPORT ${projectName}Targets
+  FILE ${projectName}Targets.cmake
+  NAMESPACE ${projectName}::
+  DESTINATION lib/cmake/${projectName}
+)
+
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/${projectName}Config.cmake"
+  DESTINATION lib/cmake/${projectName}
 )
 
