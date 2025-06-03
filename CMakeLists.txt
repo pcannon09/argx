@@ -25,7 +25,7 @@ set(programLinkFlags
     -g
 )
 
-set(CPP_STD 14)
+set(CPP_STD 11)
 
 set(CMAKE_COLOR_DIAGNOSTICS ON)
 set(CMAKE_CXX_STANDARD ${CPP_STD})
