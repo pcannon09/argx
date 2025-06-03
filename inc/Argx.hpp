@@ -32,6 +32,9 @@ namespace argx
 
 		std::string createDocs(ARGXStyle style, const std::string &title, const std::string &mainInfo);
 
+		int findParam(const std::string& id);
+		bool paramExists(const std::string &id);
+
 		std::vector<std::string> getMainArgs() const;
 		std::vector<ARGXOptions> getOptions() const;
 		std::string getID() const;
