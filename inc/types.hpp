@@ -39,6 +39,7 @@ namespace argx
 		 */
 		std::string sparam;
 		std::string info;
+		std::string content;
 
 		bool hasSubParams = false;
 
