@@ -8,6 +8,7 @@
 #include <locale>
 
 #include "../inc/Argx.hpp"
+#include "../inc/ARGXAddError.hpp"
 #include "../inc/types.hpp"
 
 namespace argx
@@ -16,11 +17,25 @@ namespace argx
 	std::vector<ARGXOptions> Argx::options;
 	std::vector<std::string> *Argx::mainArgs = nullptr;
 
+	unsigned int Argx::mainArgc;
+
 	// PUBLIC:
-	Argx::Argx(const std::string &id, int argc, char *argv[])
+	Argx::Argx(const std::string &id, int argc, char *argv[], bool startEmpty)
 		: id(id)
 	{
         this->mainArgs = new std::vector<std::string>(argv, argv + argc);
+        this->mainArgc = argc;
+
+        if (!startEmpty)
+        {
+			argx::ARGXOptions emptyOption;
+
+			emptyOption.id = "";
+			emptyOption.param = "";
+			emptyOption.sparam = "";
+			emptyOption.info = "";
+			emptyOption.hasSubParams = true;
+        }
 	}
 
 	Argx::Argx()
@@ -79,118 +94,128 @@ namespace argx
 		return false;
 	}
 
+
+	
 	ARGXParam Argx::getParam(const std::string &id)
 	{
-    	ARGXParam result;
+		if (this->mainArgc <= 1) return {};
 
-    	// First, check if this is a top-level option
-    	for (const auto &opt : this->options)
-    	{
-        	if (opt.id == id)
-        	{
-            	// Find the position of the main option in arguments
-            	int mainOptionPos = -1;
-            	for (size_t i = 0; i < this->mainArgs->size(); ++i)
-            	{
-                	if ((*this->mainArgs)[i] == opt.param || (*this->mainArgs)[i] == opt.sparam)
-                	{
-                    	result.exists = true;
-                    	mainOptionPos = i;
-                    	break;
-                	}
-            	}
+		ARGXParam result;
 
-            	if (result.exists && opt.hasSubParams)
-            	{
-                	// Check each sub-parameter
-                	for (const auto &sub : opt.subParams)
-                	{
-                    	bool subMatched = false;
-                    	// Look for sub-parameters after the main option
-                    	for (size_t i = mainOptionPos + 1; i < this->mainArgs->size(); ++i)
-                    	{
-                        	if ((*this->mainArgs)[i] == sub.param || (*this->mainArgs)[i] == sub.sparam)
-                        	{
-                            	subMatched = true;
-                            	break;
-                        	}
-                    	}
-                    	result.subExists.push_back(subMatched);
-                	}
-            	}
-            	return result;
-        	}
-    	}
+		// First, check if this is a top-level option
+		for (const auto &opt : this->options)
+		{
+			if (opt.id == id)
+			{
+				// Find the position of the main option in arguments
+				int mainOptionPos = -1;
 
-    	// If not found as top-level, check if it's a sub-parameter
-    	for (const auto &opt : this->options)
-    	{
-        	// Find if the parent option exists and get its position
-        	size_t parentPos = -1;
+				for (size_t i = 0; i < this->mainArgs->size(); ++i)
+				{
+					if ((*this->mainArgs)[i] == opt.param || (*this->mainArgs)[i] == opt.sparam)
+					{
+						result.exists = true;
+						mainOptionPos = i;
+						break;
+					}
+				}
 
-        	for (size_t i = 0; i < this->mainArgs->size(); ++i)
-        	{
-            	if ((*this->mainArgs)[i] == opt.param || (*this->mainArgs)[i] == opt.sparam)
-            	{
-                	parentPos = i;
-	
-                	break;
-            	}
-        	}
+				if (result.exists)
+				{
+					if (opt.hasSubParams)
+					{
+						// Check each sub-parameter
+						for (const auto &sub : opt.subParams)
+						{
+							bool subMatched = false;
 
-        	if (parentPos > -1 && opt.hasSubParams)
-        	{
-            	// Check if the requested sub-parameter exists after the parent
-            	for (const auto &sub : opt.subParams)
-            	{
-                	if (sub.id == id)
-                	{
-                    	// Look for this sub-parameter after the parent option
-                    	for (size_t i = parentPos + 1; i < this->mainArgs->size(); ++i)
-                    	{
-                        	if ((*this->mainArgs)[i] == sub.param || (*this->mainArgs)[i] == sub.sparam)
-                        	{
-                            	result.exists = true;
+							// Look for sub-parameters after the main option
+							for (size_t i = mainOptionPos + 1; i < this->mainArgs->size(); ++i)
+							{
+								if ((*this->mainArgs)[i] == sub.param || (*this->mainArgs)[i] == sub.sparam)
+								{
+									subMatched = true;
+									break;
+								}
+							}
 
-                            	break;
-                        	}
-                    	}
+							result.subExists.push_back(subMatched);
+						}
+					}
 
-                    	if (!result.exists && parentPos + 1 < this->mainArgs->size())
-                    	{
-                        	std::string nextArg = (*this->mainArgs)[parentPos + 1];
+					return result;
+				}
+			}
+		}
 
-                        	if (nextArg == sub.param || nextArg == sub.sparam) result.exists = true;
-                    	}
+		// If not found as top-level, check if it's a sub-parameter
+		for (const auto &opt : this->options)
+		{
+			// Find if the parent option exists and get its position
+			size_t parentPos = -1;
 
-                    	// Handle any sub-sub-parameters if they exist
-                    	if (result.exists && sub.hasSubParams)
-                    	{
-                        	for (const auto &subsub : sub.subParams)
-                        	{
-                            	bool subsubMatched = false;
+			for (size_t i = 0; i < this->mainArgs->size(); ++i)
+			{
+				if ((*this->mainArgs)[i] == opt.param || (*this->mainArgs)[i] == opt.sparam)
+				{
+					parentPos = i;
+					break;
+				}
+			}
 
-                            	for (size_t i = 0; i < this->mainArgs->size(); ++i)
-                            	{
-                                	if ((*this->mainArgs)[i] == subsub.param || (*this->mainArgs)[i] == subsub.sparam)
-                                	{
-                                    	subsubMatched = true;
+			if (parentPos > -1 && opt.hasSubParams)
+			{
+				// Check if the requested sub-parameter exists after the parent
+				for (const auto &sub : opt.subParams)
+				{
+					if (sub.id == id)
+					{
+						for (size_t i = parentPos + 1; i < this->mainArgs->size(); ++i)
+						{
+							if ((*this->mainArgs)[i] == sub.param || (*this->mainArgs)[i] == sub.sparam)
+							{
+								result.exists = true;
+								break;
+							}
+						}
 
-                                    	break;
-                                	}
-                            	}
+						if (!result.exists && parentPos + 1 < this->mainArgs->size())
+						{
+							std::string nextArg = (*this->mainArgs)[parentPos + 1];
 
-                            	result.subExists.push_back(subsubMatched);
-                        	}
-                    	}
+							if (nextArg == sub.param || nextArg == sub.sparam) result.exists = true;
+						}
 
-                    	return result;
-                	}
-            	}
-        	}
-    	}
+						// Handle any sub-sub-parameters if they exist
+						if (result.exists && sub.hasSubParams)
+						{
+							for (const auto &subsub : sub.subParams)
+							{
+								bool subsubMatched = false;
 
-    	return result;
+								for (size_t i = 0; i < this->mainArgs->size(); ++i)
+								{
+									if ((*this->mainArgs)[i] == subsub.param || (*this->mainArgs)[i] == subsub.sparam)
+									{
+										subsubMatched = true;
+										break;
+									}
+								}
+
+								result.subExists.push_back(subsubMatched);
+							}
+						}
+
+						return result;
+					}
+				}
+			}
+		}
+
+		throw argx::ARGXAddError(
+				"Option `" + id + "` is not registered",
+				"Register the option to get an existing param"
+		);
 	}
 
 	std::string Argx::createDocs(ARGXStyle style, const std::string &title, const std::string &mainInfo)
@@ -215,8 +240,8 @@ namespace argx
 
 						contentStr += sub.param;
 
-						if (i < x.subParams.size())
-							contentStr += " | ";
+						if (i < x.subParams.size() - 1) contentStr += " | ";
+						else if (i <= x.subParams.size()) contentStr += ' ';
 					}
 
 					contentStr += "] ] ";

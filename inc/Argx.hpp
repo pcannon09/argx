@@ -22,8 +22,10 @@ namespace argx
 		static std::vector<ARGXOptions> options;
 		static std::vector<std::string> *mainArgs;
 
+		static unsigned int mainArgc;
+
 	public:
-		Argx(const std::string &id, int argc, char *argv[]);
+		Argx(const std::string &id, int argc, char *argv[], bool startEmpty = false);
 		Argx();
 		~Argx();
 
