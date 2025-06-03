@@ -11,84 +11,84 @@ int main(int argc, char *argv[])
 	std::string docStr;
 	
 	argx::Argx mainArgx("main-args", argc, argv);
-
 	{
-		argx::ARGXOptions mainOptions;
+		argx::ARGXOptions helpOption;
+		argx::ARGXOptions versionOption;
 
-		mainOptions.id = "help";
-		mainOptions.param = "--help";
-		mainOptions.sparam = "-h";
-		mainOptions.info = "Show this help";
-		mainOptions.hasSubParams = true;
+		helpOption.id = "help";
+		helpOption.param = "--help";
+		helpOption.sparam = "-h";
+		helpOption.info = "Show this help";
+		helpOption.hasSubParams = true;
 
+		versionOption.id = "version";
+		versionOption.param = "--version";
+		versionOption.sparam = "-v";
+		versionOption.info = "Show fake version message";
+		versionOption.hasSubParams = true;
+		
 		argx::ARGXOptions versionSubOption;
-		argx::ARGXOptions randomSubOption;
-
+		argx::ARGXOptions messageSubOption;
+		
 		versionSubOption.id = "version";
 		versionSubOption.param = "version";
 		versionSubOption.sparam = "v";
 		versionSubOption.info = "Show version help";
-		versionSubOption.hasSubParams = true;
+		versionSubOption.hasSubParams = false;
+		
+		messageSubOption.id = "message";
+		messageSubOption.param = "message";
+		messageSubOption.sparam = "m";
+		messageSubOption.info = "Show this message \"Hello world\"";
+		messageSubOption.hasSubParams = false;
+		
+		helpOption.subParams.push_back(versionSubOption);
+		helpOption.subParams.push_back(messageSubOption);
 
-		randomSubOption.id = "message";
-		randomSubOption.param = "msg";
-		randomSubOption.sparam = "m";
-		randomSubOption.info = "Show this message \"Hello world\"";
-		randomSubOption.hasSubParams = true;
+		versionOption.subParams.push_back(versionSubOption);
 
-		randomSubOption.id = "other";
-		randomSubOption.param = "other";
-		randomSubOption.sparam = "o";
-		randomSubOption.info = "Show this message \"Goodbye world\"";
-		randomSubOption.hasSubParams = false;
-
-		mainOptions.subParams.push_back(versionSubOption);
-		mainOptions.subParams.push_back(randomSubOption);
-
-		mainArgx.add(mainOptions);
+		mainArgx.add(helpOption);
+		mainArgx.add(versionOption);
+		
 		docStr = mainArgx.createDocs(argx::ARGXStyle::Professional, "-- Docs ----", "This is a simple test for documentation using ARGX");
 	}
 
-	if (mainArgx.getParam("help").exists && mainArgx.findParam("help"))
+	auto a = mainArgx.getOptions();
+
+	for (const auto &x : a)
+	{
+		std::cout << x.id << "\n";
+	}
+	
+	// Check if help exists
+	if (mainArgx.getParam("help").exists)
 	{
 		argx::ARGXParam helpParam = mainArgx.getParam("help");
 
-    	if (mainArgx.paramExists("version") && helpParam.subExists[mainArgx.findParam("version")])
-    	{
+    	if (mainArgx.getSubParam(helpParam, "version"))
+		{
 			std::cout << "VERSION PARAM CALLED\n";
+			return 0;
+		}
 
-        	return 0;
-    	}
-
-    	if (mainArgx.paramExists("message") && helpParam.subExists[mainArgx.findParam("message")])
-    	{
-    		if (helpParam.subExists[mainArgx.findParam("message") + 1])
-    		{
-				std::cout << "NEXT\n";
-
-				return 0;
-    		}
-
+    	else if (mainArgx.getSubParam(helpParam, "message"))
+		{
 			std::cout << "This is a random hard coded message string\n";
+			
+			if (mainArgx.getArgc() > 3) std::cout << "And this is your message: " << mainArgx.getMainArgs()[3] << "\n";
 
 			return 0;
-    	}
+		}
 
-    	std::cout << docStr << "\n";
-	}
-
-	else if (mainArgx.getParam("version").exists && mainArgx.findParam("help"))
-	{
-		argx::ARGXParam versionParam = mainArgx.getParam("version");
-
-		// if (mainArgx.paramExists("version") && versionParam.subExists[mainArgx.findParam("version") + 1])
-		// {
-		//
-		// }
-
-		std::cout << "Check the source code for the version...\n";
+		// Default help output
+		std::cout << docStr << "\n";
 
 		return 0;
+	}
+
+	else if (mainArgx.getParam("version").exists)
+	{
+		std::cout << "Fake version, WOMP WOMP\n";
 	}
 
 	return 0;
