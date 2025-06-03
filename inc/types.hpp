@@ -10,8 +10,6 @@ namespace argx
 	{
 		Professional,
 		Simple,
-		Stylish,
-		Custom,
 	};
 
 	typedef struct ARGXError
