@@ -8,6 +8,8 @@
 
 int main(int argc, char *argv[])
 {
+	std::string docStr;
+	
 	argx::Argx mainArgx("main-args", argc, argv);
 
 	{
@@ -19,44 +21,31 @@ int main(int argc, char *argv[])
 		mainOptions.info = "Show this help";
 		mainOptions.hasSubParams = true;
 
-		argx::ARGXOptions subOption;
+		argx::ARGXOptions versionSubOption;
+		argx::ARGXOptions randomSubOption;
 
-		subOption.id = "version";
-		subOption.param = "version";
-		subOption.sparam = "v";
-		subOption.hasSubParams = true;
+		versionSubOption.id = "version";
+		versionSubOption.param = "version";
+		versionSubOption.sparam = "v";
+		versionSubOption.info = "Show version help";
+		versionSubOption.hasSubParams = true;
 
-		mainOptions.subParams.push_back(subOption);
+		randomSubOption.id = "message";
+		randomSubOption.param = "msg";
+		randomSubOption.sparam = "m";
+		versionSubOption.info = "Show this message \"Hello world\"";
+		randomSubOption.hasSubParams = true;
 
-		subOption.id = "this";
-		subOption.param = "this";
-		subOption.sparam = "t";
-		subOption.hasSubParams = true;
-
-		mainOptions.subParams.push_back(subOption);
+		mainOptions.subParams.push_back(versionSubOption);
+		mainOptions.subParams.push_back(randomSubOption);
 
 		mainArgx.add(mainOptions);
-		mainArgx.createDoc(argx::ARGXStyle::Professional, "", "");
+		docStr = mainArgx.createDoc(argx::ARGXStyle::Professional, "-- Docs ----", "This is the main documentation for ARGX");
 	}
 
 	if (mainArgx.getParam("help").exists)
 	{
-		std::cout << "-- HELP -----------------------------------------------------------------------------\n";
-		std::cout << "| * This library is a simple parameter parser for C++                               |\n";
-		std::cout << "| * NOTE: For more information on how this program is used, check the source code   |\n";
-		std::cout << "| * [-h | --help [version]] Get this help                                           |\n";
-		std::cout << "| * [            [version]] Get version help                                        |\n";
-		std::cout << "-------------------------------------------------------------------------------------\n";
-
-		if (mainArgx.getParam("version").subExists[0])
-		{
-			std::cout << "VERSION\n";
-
-			if (mainArgx.getParam("this").subExists[0])
-			{
-				std::cout << "THIS\n";
-			}
-		}
+		std::cout << docStr << "\n";
 	}
 
 	return 0;
