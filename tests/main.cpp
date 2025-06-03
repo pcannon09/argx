@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 		mainOptions.subParams.push_back(randomSubOption);
 
 		mainArgx.add(mainOptions);
-		docStr = mainArgx.createDoc(argx::ARGXStyle::Professional, "-- Docs ----", "This is the main documentation for ARGX");
+		docStr = mainArgx.createDocs(argx::ARGXStyle::Professional, "-- Docs ----", "This is the main documentation for ARGX");
 	}
 
 	if (mainArgx.getParam("help").exists)

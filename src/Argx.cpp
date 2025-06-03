@@ -81,7 +81,7 @@ namespace argx
 
 
 	
-	std::string Argx::createDoc(ARGXStyle style, const std::string &title, const std::string &mainInfo)
+	std::string Argx::createDocs(ARGXStyle style, const std::string &title, const std::string &mainInfo)
 	{
 		std::string contentStr;
 

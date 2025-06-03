@@ -30,7 +30,7 @@ namespace argx
 		void add(ARGXOptions option) const;
 		ARGXParam getParam(const std::string& id);
 
-		std::string createDoc(ARGXStyle style, const std::string &title, const std::string &mainInfo);
+		std::string createDocs(ARGXStyle style, const std::string &title, const std::string &mainInfo);
 
 		std::vector<std::string> getMainArgs() const;
 		std::vector<ARGXOptions> getOptions() const;
