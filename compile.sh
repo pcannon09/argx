@@ -28,7 +28,7 @@ function ninjaComp(){
 		cmake -S . -B build -G Ninja
 	fi
 
-	cmake --build build -j$cores
+	cmake --build build -j$cores -v
 }
 
 function makeComp(){
