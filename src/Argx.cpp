@@ -133,9 +133,6 @@ namespace argx
 		return title + "\n" + mainInfo + "\n" + contentStr;
 	}
 
-
-
-
 	std::vector<std::string> Argx::getMainArgs() const
 	{ return *this->mainArgs; }
 
