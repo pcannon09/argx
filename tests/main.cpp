@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 		mainOptions.subParams.push_back(randomSubOption);
 
 		mainArgx.add(mainOptions);
-		docStr = mainArgx.createDocs(argx::ARGXStyle::Professional, "-- Docs ----", "This is the main documentation for ARGX");
+		docStr = mainArgx.createDocs(argx::ARGXStyle::Professional, "-- Docs ----", "This is a simple test for documentation using ARGX");
 	}
 
 	if (mainArgx.getParam("help").exists && mainArgx.findParam("help"))
@@ -55,12 +55,40 @@ int main(int argc, char *argv[])
 
     	if (mainArgx.paramExists("version") && helpParam.subExists[mainArgx.findParam("version")])
     	{
-        	std::cout << "VERSION\n";
+			std::cout << "VERSION PARAM CALLED\n";
 
         	return 0;
     	}
 
+    	if (mainArgx.paramExists("message") && helpParam.subExists[mainArgx.findParam("message")])
+    	{
+    		if (helpParam.subExists[mainArgx.findParam("message") + 1])
+    		{
+				std::cout << "NEXT\n";
+
+				return 0;
+    		}
+
+			std::cout << "This is a random hard coded message string\n";
+
+			return 0;
+    	}
+
     	std::cout << docStr << "\n";
+	}
+
+	else if (mainArgx.getParam("version").exists && mainArgx.findParam("help"))
+	{
+		argx::ARGXParam versionParam = mainArgx.getParam("version");
+
+		// if (mainArgx.paramExists("version") && versionParam.subExists[mainArgx.findParam("version") + 1])
+		// {
+		//
+		// }
+
+		std::cout << "Check the source code for the version...\n";
+
+		return 0;
 	}
 
 	return 0;
