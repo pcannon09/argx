@@ -58,18 +58,32 @@ namespace argx
 
 	int Argx::findParam(const std::string &id)
 	{
-    	// Look for the sub-parameter in all options
+    	// First check if it's a main parameter
+    	for (size_t i = 0; i < this->options.size(); i++)
+    	{
+        	if (this->options[i].id == id)
+        	{
+            	// Check if this main parameter exists in arguments
+            	for (const std::string &arg : *this->mainArgs)
+            	{
+                	if (arg == this->options[i].param || arg == this->options[i].sparam)
+                	{
+                    	return static_cast<int>(i);
+                	}
+            	}
+        	}
+    	}
+
+    	// Then look for sub-parameters
     	for (const auto &opt : this->options)
     	{
         	// Check if the parent option exists in the arguments
         	bool parentExists = false;
-
         	for (const std::string &arg : *this->mainArgs)
         	{
             	if (arg == opt.param || arg == opt.sparam)
             	{
                 	parentExists = true;
-
                 	break;
             	}
         	}
@@ -212,11 +226,11 @@ namespace argx
 			}
 		}
 
-		throw argx::ARGXAddError(
-				"Option `" + id + "` is not registered",
-				"Register the option to get an existing param"
-		);
+		return result;
 	}
+
+	bool Argx::getSubParam(const argx::ARGXParam &param, const std::string &id)
+	{ return this->paramExists(id) && param.subExists[this->findParam(id)]; }
 
 	std::string Argx::createDocs(ARGXStyle style, const std::string &title, const std::string &mainInfo)
 	{
@@ -272,6 +286,9 @@ namespace argx
 
 	std::vector<std::string> Argx::getMainArgs() const
 	{ return *this->mainArgs; }
+
+	int Argx::getArgc() const
+	{ return this->mainArgc; }
 
 	std::vector<ARGXOptions> Argx::getOptions() const
 	{ return this->options; }
