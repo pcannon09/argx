@@ -14,15 +14,14 @@ project(${projectName} VERSION ${projectVersion})
 
 # Compiler flags
 set(programFlags
-	# -fsanitize=address
+	-fsanitize=address
     -g
     -Wunused
     -Wall
-    -Wno-range-loop-analysis
 )
 
 set(programLinkFlags
-	# -fsanitize=address
+	-fsanitize=address
     -g
 )
 
