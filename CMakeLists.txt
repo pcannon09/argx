@@ -1,111 +1,118 @@
 cmake_minimum_required(VERSION 3.24)
 
 # Read project metadata
-file(READ "${CMAKE_SOURCE_DIR}/.private/project.json" projectInfo)
-string(JSON projectName GET "${projectInfo}" exeName)
-string(JSON projectVersion GET "${projectInfo}" version)
-string(JSON projectVersionState GET "${projectInfo}" versionState)
-string(JSON projectVersionSTD GET "${projectInfo}" versionSTD)
+file(READ "${CMAKE_SOURCE_DIR}/.private/project.json" PROJECT_INFO)
+string(JSON PROJECT_NAME GET "${PROJECT_INFO}" exeName)
+string(JSON PROJECT_VERSION GET "${PROJECT_INFO}" version)
+string(JSON PROJECT_VERSION_STATE GET "${PROJECT_INFO}" versionState)
+string(JSON PROJECT_VERSION_STD GET "${PROJECT_INFO}" versionSTD)
 
-set(VERSION "${projectVersion} ${versionState}")
-set(STD_VERSION "${projectVersionSTD}")
+project(${PROJECT_NAME} VERSION ${PROJECT_VERSION} LANGUAGES CXX)
 
-project(${projectName} VERSION ${projectVersion} LANGUAGES CXX)
-
-# Use C++11 standard
+# Project settings
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_EXTENSIONS off)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_COLOR_DIAGNOSTICS ON)
+set(CMAKE_BUILD_TYPE Debug)
 
-# Enable policy for install RPATH handling (CMP0147)
+# Enable policy for install RPATH handling
 cmake_policy(SET CMP0147 NEW)
 
-# Directories
-set(srcDir "${CMAKE_SOURCE_DIR}/src")
-set(incDir "${CMAKE_SOURCE_DIR}/inc")
-set(testsDir "${CMAKE_SOURCE_DIR}/tests")
+# Directory structure
+set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
+set(INC_DIR "${CMAKE_SOURCE_DIR}/inc")
+set(TESTS_DIR "${CMAKE_SOURCE_DIR}/tests")
 
-# Project files
-set(headers
-    ${incDir}/macros.hpp
-    ${incDir}/types.hpp
-    ${incDir}/Argx.hpp
-    ${incDir}/ARGXAddError.hpp
+# Source files
+set(HEADERS
+    ${INC_DIR}/macros.hpp
+    ${INC_DIR}/types.hpp
+    ${INC_DIR}/Argx.hpp
+    ${INC_DIR}/ARGXAddError.hpp
 )
 
-set(sources
-    ${srcDir}/Argx.cpp
-    ${srcDir}/ARGXAddError.cpp
+set(SOURCES
+    ${SRC_DIR}/Argx.cpp
+    ${SRC_DIR}/ARGXAddError.cpp
 )
 
-# Build static library
-add_library(${projectName}_static STATIC ${sources} ${headers})
-target_include_directories(${projectName}_static
-  PUBLIC
-    $<BUILD_INTERFACE:${incDir}>
-    $<INSTALL_INTERFACE:include>
+# Function to configure common target properties
+function(configure_target TARGET_NAME)
+    target_include_directories(${TARGET_NAME}
+        PUBLIC
+            $<BUILD_INTERFACE:${INC_DIR}>
+            $<INSTALL_INTERFACE:include>
+    )
+    
+    target_compile_options(${TARGET_NAME} PRIVATE
+        $<$<CONFIG:DEBUG>:-g;-Og;-Wall;-Wextra;-Wpedantic;-fsanitize=address,leak>
+        $<$<CONFIG:RELEASE>:-O3;-march=native;-DNDEBUG>
+    )
+    
+    target_link_options(${TARGET_NAME} PRIVATE
+        $<$<CONFIG:DEBUG>:-fsanitize=address,leak>
+    )
+endfunction()
+
+# Create libraries
+add_library(${PROJECT_NAME}_static STATIC ${SOURCES} ${HEADERS})
+add_library(${PROJECT_NAME}_shared SHARED ${SOURCES} ${HEADERS})
+
+# Configure library targets
+configure_target(${PROJECT_NAME}_static)
+configure_target(${PROJECT_NAME}_shared)
+
+# Create aliases for better namespace usage
+add_library(${PROJECT_NAME}::static ALIAS ${PROJECT_NAME}_static)
+add_library(${PROJECT_NAME}::shared ALIAS ${PROJECT_NAME}_shared)
+
+# Create executable
+add_executable(${PROJECT_NAME} ${TESTS_DIR}/main.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}::shared)
+target_include_directories(${PROJECT_NAME} PRIVATE ${INC_DIR})
+configure_target(${PROJECT_NAME})
+
+# Set output directory
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 
-# Build shared library
-add_library(${projectName}_shared SHARED ${sources} ${headers})
-target_include_directories(${projectName}_shared
-  PUBLIC
-    $<BUILD_INTERFACE:${incDir}>
-    $<INSTALL_INTERFACE:include>
+# Installation
+install(TARGETS ${PROJECT_NAME}_static ${PROJECT_NAME}_shared ${PROJECT_NAME}
+    EXPORT ${PROJECT_NAME}Targets
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    INCLUDES DESTINATION include
 )
 
-# Build executable linking to shared library
-add_executable(${projectName} ${testsDir}/main.cpp)
-target_link_libraries(${projectName} PRIVATE ${projectName}_shared)
-target_include_directories(${projectName}
-  PRIVATE
-    ${incDir}
-)
+install(DIRECTORY ${INC_DIR}/ DESTINATION include)
 
-# Compiler and linker flags per target
-foreach(tgt IN ITEMS ${projectName}_static ${projectName}_shared ${projectName})
-  target_compile_options(${tgt} PRIVATE
-    $<$<CONFIG:DEBUG>:-g;-Og;-Wall;-Wextra;-Wpedantic;-fsanitize=address>
-    $<$<CONFIG:RELEASE>:-O3;-march=native;-DNDEBUG>
-  )
-  target_link_options(${tgt} PRIVATE
-    $<$<CONFIG:DEBUG>:-fsanitize=address>
-  )
-endforeach()
-
-# Output directory for binaries
-set_target_properties(${projectName} PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-)
-
-# Install rules
-install(TARGETS ${projectName}_static ${projectName}_shared ${projectName}
-  EXPORT ${projectName}Targets
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-)
-
-install(DIRECTORY ${incDir}/ DESTINATION include)
-
-# Generate and install export config files
+# Package configuration
 include(CMakePackageConfigHelpers)
 
 configure_package_config_file(
-  "${CMAKE_SOURCE_DIR}/cmake/Config.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/${projectName}Config.cmake"
-  INSTALL_DESTINATION lib/cmake/${projectName}
+    "${CMAKE_SOURCE_DIR}/cmake/Config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+    INSTALL_DESTINATION lib/cmake/${PROJECT_NAME}
 )
 
-install(EXPORT ${projectName}Targets
-  FILE ${projectName}Targets.cmake
-  NAMESPACE ${projectName}::
-  DESTINATION lib/cmake/${projectName}
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(EXPORT ${PROJECT_NAME}Targets
+    FILE ${PROJECT_NAME}Targets.cmake
+    NAMESPACE ${PROJECT_NAME}::
+    DESTINATION lib/cmake/${PROJECT_NAME}
 )
 
 install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/${projectName}Config.cmake"
-  DESTINATION lib/cmake/${projectName}
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+    DESTINATION lib/cmake/${PROJECT_NAME}
 )
-
