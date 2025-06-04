@@ -3,7 +3,7 @@
 // Versioning
 #define ARGX_VERSION_MAJOR            0
 #define ARGX_VERSION_MINOR            1
-#define ARGX_VERSION_PATCH            0
+#define ARGX_VERSION_PATCH            2
 
 #define ARGX_VERSION_STD              20250604 // Once released, it will be YyyyMmDd (eg: 20250604)
 
