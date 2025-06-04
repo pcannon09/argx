@@ -117,13 +117,6 @@ int main(int argc, char *argv[])
 		std::cout << "Development Type: " << (ARGX_DEV ? "DEV" : "PRODUCTION") << "\n";
 	}
 
-	for (const auto &x : mainArgx.getOptions())
-	{
-		std::cout << x.id << "\n";
-		std::cout << x.param << "\n";
-		std::cout << x.sparam << "\n";
-	}
-
 	if (!mainArgx.compareArgs(mainArgx.getOptions(), mainArgx.getMainArgs()))
 		std::cout << "Argx: Unknown option `" + (mainArgx.getArgc() > 1 ? mainArgx.getMainArgs()[1] : "<UNKNOWN>") + "`\n";
 
