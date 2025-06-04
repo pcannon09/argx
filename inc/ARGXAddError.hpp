@@ -1,6 +1,6 @@
 #pragma once
 
-#if __cplusplus >= 201102L
+#if __cplusplus >= 201103L
 
 #include <string>
 #include <utility>
