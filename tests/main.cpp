@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 		messageSubOption.id = "message";
 		messageSubOption.param = "message";
 		messageSubOption.sparam = "m";
-		messageSubOption.info = "Show this message \"Hello world\"";
+		messageSubOption.info = "Show a specific message";
 		messageSubOption.hasSubParams = false;
 		
 		helpOption.subParams.push_back(versionSubOption);
