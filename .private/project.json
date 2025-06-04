@@ -2,9 +2,9 @@
 	"exeName": "argx",
 	"name": "argx",
 
-	"version": "0.0.1",
-	"versionState": "dev",
-	"versionSTD": "YyyyMmDd",
+	"version": "0.1.2",
+	"versionState": "beta",
+	"versionSTD": "20250604",
 
 	"about":
 	{
