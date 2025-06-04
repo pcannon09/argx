@@ -1,4 +1,4 @@
-# Doxyfile 1.13.2 - Fully configured for Argx (C++17+)
+# Doxyfile 1.13.2 - Fully configured for Argx
 
 #---------------------------------------------------------------------------
 # Project Info
@@ -6,7 +6,7 @@
 
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Argx"
-PROJECT_NUMBER         = 1.0.0-build
+PROJECT_NUMBER         = 1.0.1-build
 PROJECT_BRIEF          = "Simple argument parser made in C++"
 OUTPUT_DIRECTORY       = docs/
 CREATE_SUBDIRS         = YES
@@ -20,9 +20,6 @@ OUTPUT_LANGUAGE        = English
 INPUT                  = inc/ src/ README.md
 FILE_PATTERNS          = *.cpp *.hpp *.h *.c *.md *.dox
 RECURSIVE              = YES
-# EXCLUDE_PATTERNS       = */build/* */CMakeFiles/* */.git/* *_test.* *_tests.*
-# EXAMPLE_PATH           = examples/ samples/
-# EXAMPLE_PATTERNS       = *.cpp *.h *.hpp
 EXAMPLE_RECURSIVE      = YES
 USE_MDFILE_AS_MAINPAGE = README.md
 INPUT_ENCODING         = UTF-8

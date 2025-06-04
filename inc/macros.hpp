@@ -3,7 +3,7 @@
 // Versioning
 #define ARGX_VERSION_MAJOR            1
 #define ARGX_VERSION_MINOR            0
-#define ARGX_VERSION_PATCH            0
+#define ARGX_VERSION_PATCH            1
 
 #define ARGX_VERSION_STD              20250604
 
