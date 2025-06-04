@@ -33,7 +33,7 @@ if [ "$1" == "--ungen" ]; then
     echo -e "${BOLD}${CYAN}[ NOTE ] Execute this file without the \`--ungen\` flag to generate all files"
     exit
 
-elif [ "$1" == "--doxygen" ]; then
+elif [ "$1" == "--doxygen" ] || [ "$1" == "-d" ]; then
 	doxygen Doxyfile
 fi
 
