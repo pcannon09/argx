@@ -38,6 +38,8 @@ set(SOURCES
     ${SRC_DIR}/ARGXAddError.cpp
 )
 
+# NOTE: ADD FOLLOWING WHEN NOT DEVELOPING IN CHROMEOS
+# -fsanitize=address,leak>
 # Function to configure common target properties
 function(configure_target TARGET_NAME)
     target_include_directories(${TARGET_NAME}
@@ -47,12 +49,12 @@ function(configure_target TARGET_NAME)
     )
     
     target_compile_options(${TARGET_NAME} PRIVATE
-        $<$<CONFIG:DEBUG>:-g;-Og;-Wall;-Wextra;-Wpedantic;-fsanitize=address,leak>
+        $<$<CONFIG:DEBUG>:-g;-Og;-Wall;-Wextra;-Wpedantic;>
         $<$<CONFIG:RELEASE>:-O3;-march=native;-DNDEBUG>
     )
     
     target_link_options(${TARGET_NAME} PRIVATE
-        $<$<CONFIG:DEBUG>:-fsanitize=address,leak>
+        $<$<CONFIG:DEBUG>:>
     )
 endfunction()
 
@@ -83,12 +85,12 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 install(TARGETS ${PROJECT_NAME}_static ${PROJECT_NAME}_shared ${PROJECT_NAME}
     EXPORT ${PROJECT_NAME}Targets
     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    INCLUDES DESTINATION include
+    LIBRARY DESTINATION lib/${PROJECT_NAME}
+    ARCHIVE DESTINATION lib/${PROJECT_NAME}
+    INCLUDES DESTINATION include/${PROJECT_NAME}
 )
 
-install(DIRECTORY ${INC_DIR}/ DESTINATION include)
+install(DIRECTORY ${INC_DIR}/ DESTINATION include/${PROJECT_NAME})
 
 # Package configuration
 include(CMakePackageConfigHelpers)
