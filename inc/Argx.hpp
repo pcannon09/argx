@@ -76,6 +76,14 @@ namespace argx
 		bool paramExists(const std::string &id);
 
 		/**
+		 * @brief Compare if `options` contains the required `id`, if the ID does not exist, return false
+		 * @param options Return ARGXOptions vector
+		 * @param id ID to find
+		 * @return bool
+		 */
+		bool compareArgs(std::vector<ARGXOptions> options, std::vector<std::string> argv);
+
+		/**
 		 * @brief Get the sub-param from `id`
 		 * @param param Original param
 		 * @param id The ID to get

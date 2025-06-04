@@ -251,7 +251,7 @@ namespace argx
 					contentStr += "] ] ";
 				}
 
-				else contentStr += " ] ] ";
+				else contentStr += " ] ";
 
 				contentStr += x.info + "\n";
 
@@ -271,7 +271,47 @@ namespace argx
 			}
 		}
 
+		else if (style == ARGXStyle::Simple)
+		{
+			for (const auto &x : this->options)
+			{
+				contentStr += x.sparam + ", " + x.param + " - " + x.info + "\n";
+
+				if (x.hasSubParams && !x.subParams.empty())
+				{
+					for (const auto &sub : x.subParams)
+					{
+						contentStr += "  " + sub.sparam + ", " + sub.param + " - " + sub.info + "\n";
+					}
+				}
+			}
+		} // ARGXStyle
+
 		return title + "\n" + mainInfo + "\n" + contentStr;
+	}
+
+	bool Argx::compareArgs(std::vector<ARGXOptions> options, std::vector<std::string> argv)
+	{
+    	// Skip program name ( as arg )
+    	for (size_t i = 1 ; i < argv.size() ; ++i)
+    	{
+        	const std::string &arg = argv[i];
+
+        	bool found = false;
+        	for (const auto &option : options)
+        	{
+            	if (option.sparam == arg || option.param == arg)
+            	{
+                	found = true;
+                	break;
+            	}
+        	}
+        	if (!found)
+        	{
+            	return false; // Unknown argument
+        	}
+    	}
+    	return true; // All arguments are valid
 	}
 
 	std::vector<std::string> Argx::getMainArgs() const
