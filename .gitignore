@@ -6,6 +6,8 @@
 *.tmp
 *.swp
 *.bak
+*.log
+*.tag
 
 tmp/
 .cache/
