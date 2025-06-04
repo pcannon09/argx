@@ -20,22 +20,11 @@ namespace argx
 	unsigned int Argx::mainArgc;
 
 	// PUBLIC:
-	Argx::Argx(const std::string &id, int argc, char *argv[], bool startEmpty)
+	Argx::Argx(const std::string &id, int argc, char *argv[])
 		: id(id)
 	{
         this->mainArgs = new std::vector<std::string>(argv, argv + argc);
         this->mainArgc = argc;
-
-        if (!startEmpty)
-        {
-			argx::ARGXOptions emptyOption;
-
-			emptyOption.id = "";
-			emptyOption.param = "";
-			emptyOption.sparam = "";
-			emptyOption.info = "";
-			emptyOption.hasSubParams = true;
-        }
 	}
 
 	Argx::Argx()
@@ -79,6 +68,7 @@ namespace argx
     	{
         	// Check if the parent option exists in the arguments
         	bool parentExists = false;
+
         	for (const std::string &arg : *this->mainArgs)
         	{
             	if (arg == opt.param || arg == opt.sparam)
