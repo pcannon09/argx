@@ -24,3 +24,6 @@
 
 * For more information, please check the documentation at **https://pcannon09.github.io/docs/pages/libs/argx/html/index.html**
 
+## APIs
+#### Python3 API: **https://github.com/pcannon09/argx-py**
+#### C API / Clone: **https://github.com/pcannon09/argx-c**
