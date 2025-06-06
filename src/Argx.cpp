@@ -20,12 +20,25 @@ namespace argx
 	unsigned int Argx::mainArgc;
 
 	// PUBLIC:
+#if defined(ARGX_AS_PYTHON_PACKAGE)
+	Argx::Argx(const std::string &id, const std::vector<std::string> &args)
+		: id(id)
+	{
+		this->mainArgs = new std::vector<std::string>(args);
+		this->mainArgc = args.size();
+	}
+
+	void Argx::destroy()
+	{ this->~Argx(); }
+
+#else
 	Argx::Argx(const std::string &id, int argc, char *argv[])
 		: id(id)
 	{
         this->mainArgs = new std::vector<std::string>(argv, argv + argc);
         this->mainArgc = argc;
 	}
+#endif
 
 	Argx::Argx()
 	{ }
@@ -126,7 +139,7 @@ namespace argx
 
 				if (result.exists)
 				{
-					if (opt.hasSubParams)
+					if (opt.hasSubParams || opt.hasAnySubParams)
 					{
 						// Check each sub-parameter
 						for (const auto &sub : opt.subParams)
@@ -167,7 +180,7 @@ namespace argx
 				}
 			}
 
-			if (parentPos > -1 && opt.hasSubParams)
+			if (parentPos > -1 && (opt.hasSubParams || opt.hasAnySubParams))
 			{
 				// Check if the requested sub-parameter exists after the parent
 				for (const auto &sub : opt.subParams)
@@ -191,7 +204,7 @@ namespace argx
 						}
 
 						// Handle any sub-sub-parameters if they exist
-						if (result.exists && sub.hasSubParams)
+						if (result.exists && (sub.hasSubParams || sub.hasAnySubParams))
 						{
 							for (const auto &subsub : sub.subParams)
 							{
@@ -290,28 +303,68 @@ namespace argx
 		return title + "\n" + mainInfo + "\n" + contentStr;
 	}
 
+	
 	bool Argx::compareArgs(std::vector<ARGXOptions> options, std::vector<std::string> argv)
 	{
-    	// Skip program name ( as arg )
-    	for (size_t i = 1 ; i < argv.size() ; ++i)
+    	for (size_t i = 1; i < argv.size(); ++i)
     	{
         	const std::string &arg = argv[i];
 
         	bool found = false;
+        	bool hasSubParams = false;
+        	bool hasAnySubParams = false;
+
+        	ARGXOptions matchedOption;
+
+        	// Find the matching option
         	for (const auto &option : options)
         	{
             	if (option.sparam == arg || option.param == arg)
             	{
                 	found = true;
+                	hasSubParams = option.hasSubParams;
+					hasAnySubParams = option.hasAnySubParams;
+                	matchedOption = option;
+
                 	break;
             	}
         	}
-        	if (!found)
+
+        	if (!found) return false;
+
+        	if (hasSubParams || hasAnySubParams)
         	{
-            	return false; // Unknown argument
+            	// Check if there's a next argument
+            	if (i + 1 < argv.size())
+            	{
+                	const std::string &nextArg = argv[i + 1];
+
+                	// Check if next argument is a sub-parameter
+                	bool isSubParam = false;
+
+                	if (!nextArg.empty() && nextArg[0] != '-')
+                	{
+                    	// Validate if it's a valid sub-parameter
+                    	for (const auto &subOption : matchedOption.subParams)
+                    	{
+                        	if (subOption.param == nextArg || subOption.sparam == nextArg)
+                        	{
+                            	isSubParam = true;
+
+                            	break;
+                        	}
+                    	}
+
+                    	if (isSubParam) ++i; // Get the sub-parameter
+                   		else if (hasSubParams || hasAnySubParams) return false;
+                	}
+
+                	else if (hasSubParams || hasAnySubParams) return false;
+				}
         	}
     	}
-    	return true; // All arguments are valid
+
+    	return true;
 	}
 
 	std::vector<std::string> Argx::getMainArgs() const

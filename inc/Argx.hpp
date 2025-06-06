@@ -6,7 +6,7 @@
 
 #include "../inc/macros.hpp"
 
-#if __cplusplus >= 201103L
+#if __cplusplus >= 201103L || defined(ARGX_AS_PYTHON_PACKAGE)
 #include <string>
 #include <vector>
 
@@ -25,6 +25,20 @@ namespace argx
 		static unsigned int mainArgc;
 
 	public:
+
+#if defined(ARGX_AS_PYTHON_PACKAGE)
+		/**
+		 * @brief Create Argx with the specific `id` and `args` as a python package
+		 * @param id Set the ID of the Argx
+		 * @param args Set the `argv` of the `main()` function with the specific list contents in python
+		 */
+		Argx(const std::string &id, const std::vector<std::string> &args);
+
+		/**
+		 * @brief Call the deconstructor of the Argx option (SPECIFIC FOR PYTHON)
+		 */
+		void destroy();
+#else
 		/**
 		 * @brief Create Argx with the specific `id`, `argc` and `argv`
 		 * @param id Set the ID of the Argx
@@ -32,6 +46,8 @@ namespace argx
 		 * @param argv Set the `argv` of the `main()` function
 		 */
 		Argx(const std::string &id, int argc, char *argv[]);
+#endif
+
 		Argx();
 		~Argx();
 

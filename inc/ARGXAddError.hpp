@@ -1,6 +1,6 @@
 #pragma once
 
-#if __cplusplus >= 201103L
+#if __cplusplus >= 201103L || defined(ARGX_AS_PYTHON_PACKAGE)
 
 #include <string>
 #include <utility>
