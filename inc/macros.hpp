@@ -1,18 +1,27 @@
 #pragma once
 
+/*
+ * NOTE: 
+ * Macro `ARGX_AS_PYTHON_PACKAGE` is for python module for Argx, DO NOT enable it if you are using C++
+ */
+
 // Versioning
 #define ARGX_VERSION_MAJOR            1
 #define ARGX_VERSION_MINOR            0
-#define ARGX_VERSION_PATCH            1
+#define ARGX_VERSION_PATCH            2
 
-#define ARGX_VERSION_STD              20250604
+#define ARGX_VERSION_STD              20250606
 
 // Version states:
-// * dev
-// * beta
-// * snap
-// * build (AKA: Release)
-#define ARGX_VERSION_STATE          "build"
+// * dev                    0
+// * beta                   1
+// * snap                   2
+// * build (AKA: Release)   3
+#ifndef ARGX_AS_PYTHON_PACKAGE
+#   define ARGX_VERSION_STATE           "build"
+#else
+#   define ARGX_VERSION_STATE           3
+#endif
 
 #define ARGX_VERSION                ((ARGX_VERSION_MAJOR<<16)|(ARGX_VERSION_MINOR<<8)|(ARGX_VERSION_PATCH)|(ARGX_VERSION_STATE << 24))
 
@@ -20,7 +29,7 @@
     (((ARGX_VERSION_MAJOR)<<16)|((ARGX_VERSION_MINOR)<<8)|(ARGX_VERSION_PATCH)|((ARGX_VERSION_STATE) << 24))
 
 // DEV or PROD
-#define ARGX_DEV true
+#define ARGX_DEV false
 
 // Macro utils
 #define ARGX_STRINGIFY(x) #x

@@ -9,6 +9,12 @@
 
 int main(int argc, char *argv[])
 {
+#if defined(AS_PYTHON_PACKAGE)
+	std::cout << "FATAL: YOU SHOULD NOT RUN THIS EXECUTABLE AS `AS_PYTHON_PACKAGE`, DO NOT USE THE MACRO IF YOU ARE WILLING TO EXECUTE ARGX\n";
+
+	return -1;
+
+#else
 	std::string docStr;
 	
 	argx::Argx mainArgx("main-args", argc, argv);
@@ -29,16 +35,17 @@ int main(int argc, char *argv[])
 		versionOption.param = "--version";
 		versionOption.sparam = "-v";
 		versionOption.info = "Show version message";
-		versionOption.hasSubParams = true;
+		versionOption.hasSubParams = false;
 
 		styleOption.id = "style";
 		styleOption.param = "--style";
 		styleOption.sparam = "-s";
 		styleOption.info = "Set the style of the documentation (simple OR professional)";
-		styleOption.hasSubParams = false;
+		styleOption.hasSubParams = true;
 		
 		argx::ARGXOptions versionSubOption;
 		argx::ARGXOptions messageSubOption;
+		argx::ARGXOptions styleSubOption;
 		
 		versionSubOption.id = "version";
 		versionSubOption.param = "version";
@@ -51,6 +58,21 @@ int main(int argc, char *argv[])
 		messageSubOption.sparam = "m";
 		messageSubOption.info = "Show a specific message";
 		messageSubOption.hasSubParams = false;
+
+ 		styleSubOption.id = "simple";
+ 		styleSubOption.param = "simple";
+ 		styleSubOption.info = "Set simple documentation";
+ 		styleSubOption.hasSubParams = false;
+
+		styleOption.subParams.push_back(styleSubOption);
+
+ 		styleSubOption.id = "simple";
+ 		styleSubOption.param = "professional";
+ 		styleSubOption.sparam = "pro";
+ 		styleSubOption.info = "Set professional documentation";
+ 		styleSubOption.hasSubParams = false;
+
+		styleOption.subParams.push_back(styleSubOption);
 
 		helpOption.subParams.push_back(versionSubOption);
 		helpOption.subParams.push_back(messageSubOption);
@@ -76,7 +98,7 @@ int main(int argc, char *argv[])
 				std::cout << "Set one of those two values:\n";
 				std::cout << "* simple\n";
 				std::cout << "* professional\n";
-				std::cout << "NOTE: You can code your own documentation by overriding the Argx::createDocs() function";
+				std::cout << "NOTE: You can code your own documentation by overriding the Argx::createDocs() function\n";
 
 				return 1;
 			}
@@ -118,8 +140,13 @@ int main(int argc, char *argv[])
 	}
 
 	if (!mainArgx.compareArgs(mainArgx.getOptions(), mainArgx.getMainArgs()))
+	{
 		std::cout << "Argx: Unknown option `" + (mainArgx.getArgc() > 1 ? mainArgx.getMainArgs()[1] : "<UNKNOWN>") + "`\n";
 
-	return 1;
+		return 1;
+	}
+
+	return 0;
+#endif
 }
 
