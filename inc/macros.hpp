@@ -2,15 +2,15 @@
 
 /*
  * NOTE: 
- * Macro `ARGX_AS_PYTHON_PACKAGE` is for python module for Argx, DO NOT enable it if you are using C++
+ * Macro `ARGX_AS_PYTHON_PACKAGE` is for the Argx python module, DO NOT enable it if using C++
  */
 
 // Versioning
 #define ARGX_VERSION_MAJOR            1
-#define ARGX_VERSION_MINOR            0
-#define ARGX_VERSION_PATCH            2
+#define ARGX_VERSION_MINOR            1
+#define ARGX_VERSION_PATCH            0
 
-#define ARGX_VERSION_STD              20250606
+#define ARGX_VERSION_STD              20250721
 
 // Version states:
 // * dev                    0

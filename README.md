@@ -1,4 +1,4 @@
-# ARGX - 1.0.0-build
+# ARGX - 1.1.0-build
 ## C++ Argument parser
 ### Made by: pcannon09
 
@@ -6,8 +6,9 @@
 
 ## Requirements
 ### Compiler and C++ Standard Support
-| Current Argx Version | Minimum C++ Standard |     GCC     |    Clang    |               MSVC               |
+| Argx Version  	   | Minimum C++ Standard |     GCC     |    Clang    |               MSVC               |
 |:--------------------:|:--------------------:|:-----------:|:-----------:|:--------------------------------:|
+| 1.1.0-build          | C++11                | GCC 4.8+    | Clang 3.3+  | MSVC 2017+ (/std:c++11 or later) |
 | 1.0.0-build          | C++11                | GCC 4.8+    | Clang 3.3+  | MSVC 2017+ (/std:c++11 or later) |
 
 ### Specific information

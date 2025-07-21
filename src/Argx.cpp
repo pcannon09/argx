@@ -3,12 +3,11 @@
  */
 
 #include <string>
-#include <iostream>
 #include <codecvt>
 #include <locale>
+#include <algorithm>
 
 #include "../inc/Argx.hpp"
-#include "../inc/ARGXAddError.hpp"
 #include "../inc/types.hpp"
 
 namespace argx
@@ -48,12 +47,25 @@ namespace argx
 		delete this->mainArgs; this->mainArgs = nullptr;
 	}
 
+	int Argx::getArgPos(const std::string &arg)
+	{
+		if (!this->mainArgs)
+			return -1;
+
+		for (size_t i = 0; i < this->mainArgs->size(); ++i)
+		{
+			if (this->mainArgs->at(i) == arg)
+				return static_cast<int>(i);
+		}
+
+		return -1;
+	}
+
 	void Argx::add(ARGXOptions option) const
 	{
-		ARGXError error = {
-			.type = "success",
-			.code = 0
-		};
+		ARGXError error;
+		error.type = "success";
+		error.code = 0;
 
 		this->options.emplace_back(option);
 	}

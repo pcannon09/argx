@@ -85,6 +85,10 @@ int main(int argc, char *argv[])
 		
 		std::string msg = "Simple documentation on how to use the ARGX test";
 
+		std::cout << "HELP PARAM POSITION: " << (mainArgx.getArgPos(helpOption.param) < 0 ? mainArgx.getArgPos(helpOption.sparam) : mainArgx.getArgPos(helpOption.param)) << "\n";
+		std::cout << "STYLE PARAM POSITION: " << (mainArgx.getArgPos(styleOption.param) < 0 ? mainArgx.getArgPos(styleOption.sparam) : mainArgx.getArgPos(styleOption.param)) << "\n";
+		std::cout << "VERSION PARAM POSITION: " << (mainArgx.getArgPos(versionOption.param) < 0 ? mainArgx.getArgPos(versionOption.sparam) : mainArgx.getArgPos(versionOption.param)) << "\n";
+
 		if (mainArgx.getParam("style").exists)
 		{
 			if (mainArgx.getArgc() > 2)

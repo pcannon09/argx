@@ -52,6 +52,13 @@ namespace argx
 		~Argx();
 
 		/**
+		 * @brief Get argument position with specified `arg`
+		 * @param arg Find argument
+		 * @return int Return position of found `arg` from the options
+		 */
+		int getArgPos(const std::string &arg);
+
+		/**
 		 * @brief Add param options
 		 * @param option Add the option to the main params
 		 */
