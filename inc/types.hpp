@@ -1,6 +1,6 @@
 #pragma once
 
-#if __cplusplus >= 201103L || defined(ARGX_AS_PYTHON_PACKAGE)
+#if __cplusplus >= 201402L || defined(ARGX_AS_PYTHON_PACKAGE)
 #include <string>
 #include <vector>
 
@@ -12,7 +12,8 @@ namespace argx
 		Simple,
 	};
 
-	typedef struct ARGXError
+	typedef struct [[deprecated("ARGXError is deprecated, there is no direct replacement, this type definition is going to be removed in version 1.4.0")]]
+		ARGXError
 	{
 		std::string type;
 		std::string error;
@@ -28,20 +29,27 @@ namespace argx
 		 */
 		std::string id;
 
-		/** Param (param):
-		 * @brief EXAMPLE:
+		/**
+		 * @brief Param (param). EXAMPLE:
 		 * --help, --version
 		 */
 		std::string param;
 
-		/** Short Param (sparam):
-		 * @brief
+		/**
+		 * @brief Short Param (sparam):
 		 */
 		std::string sparam;
 		std::string info;
 
+		/**
+		 * @brief Set default tag to categorize arguments
+		 **/
+		std::string tag = "default";
+		std::string defaultValue;
+
 		bool hasSubParams = false;
 		bool hasAnySubParams = false;
+		bool required = false;
 
 		std::vector<ARGXOptions> subParams;
 	} ARGXOptions;
@@ -54,7 +62,7 @@ namespace argx
 }
 
 #else
-# 	error "Must compile with C++11 support or newer"
+# 	error "Must compile with C++14 support or newer"
 # 	pragma message("Current standard is " ARGX_TOSTRING(__cplusplus))
 #endif
 
