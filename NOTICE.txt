@@ -1,0 +1,34 @@
+NOTICE
+======
+
+Argx - Argument Parsing Library
+
+Copyright (c) 2025 pcannon09
+All rights reserved.
+
+-------------------------------------------------------------------------------
+Licensing Information
+-------------------------------------------------------------------------------
+
+- Versions **1.2.0-beta and earlier** were released under the MIT License.
+  These versions remain permanently available under MIT terms.
+
+- Version **1.2.0-beta1 and later** are released under the GNU General Public License,
+  version 3 (GPLv3). All future releases of Argx will follow GPLv3 terms.
+
+-------------------------------------------------------------------------------
+Summary
+-------------------------------------------------------------------------------
+
+- Anyone using or redistributing Argx **1.2.0-beta or earlier** may continue to do
+  so under the MIT License.
+- Anyone using or redistributing Argx **1.2.0-beta1 or later** must comply with the
+  GPLv3 License.
+- This transition ensures that Argx remains free software while protecting the
+  rights of contributors and users.
+
+For full details, please refer to:
+
+- MIT License:     https://opensource.org/licenses/MIT
+- GPLv3 License:   https://www.gnu.org/licenses/gpl-3.0.en.html
+

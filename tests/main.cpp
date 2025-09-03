@@ -7,6 +7,11 @@
 #include "../inc/macros.hpp"
 #include "../inc/Argx.hpp"
 
+std::string licenseStr = R"(ArgX  Copyright (C) 2025  pcannon09
+This program comes with ABSOLUTELY NO WARRANTY; for details type `./run.sh --help'.
+This is free software, and you are welcome to redistribute it
+under certain conditions; type `./run.sh --help' for details.)";
+
 int main(int argc, char *argv[])
 {
 #if defined(AS_PYTHON_PACKAGE)
