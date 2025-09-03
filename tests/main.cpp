@@ -10,7 +10,7 @@
 int main(int argc, char *argv[])
 {
 #if defined(AS_PYTHON_PACKAGE)
-	std::cout << "FATAL: YOU SHOULD NOT RUN THIS EXECUTABLE AS `AS_PYTHON_PACKAGE`, DO NOT USE THE MACRO IF YOU ARE WILLING TO EXECUTE ARGX\n";
+	std::cout << "FATAL: YOU SHOULD NOT RUN THIS EXECUTABLE AS `AS_PYTHON_PACKAGE`, DO NOT USE THE MACRO IF YOU ARE WILLING TO EXECUTE ARGX IN C++\n";
 
 	return -1;
 
@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
 		argx::ARGXOptions helpOption;
 		argx::ARGXOptions versionOption;
 		argx::ARGXOptions styleOption;
+		argx::ARGXOptions helpTestOption;
 
 		helpOption.id = "help";
 		helpOption.param = "--help";
@@ -57,6 +58,7 @@ int main(int argc, char *argv[])
 		messageSubOption.param = "message";
 		messageSubOption.sparam = "m";
 		messageSubOption.info = "Show a specific message";
+		messageSubOption.defaultValue = "Hello world!";
 		messageSubOption.hasSubParams = false;
 
  		styleSubOption.id = "simple";
@@ -128,8 +130,12 @@ int main(int argc, char *argv[])
 
     	else if (mainArgx.getSubParam(helpParam, "message"))
 		{
-			if (mainArgx.getArgc() > 3) std::cout << mainArgx.getMainArgs()[3] << "\n";
+			int pos = mainArgx.getArgIDPos("help");
+
+			if (mainArgx.getArgc() > pos) std::cout << mainArgx.getSubValue("message")[0] << "\n";
 			else std::cout << "Enter a message in the third parameter as a string" << "\n";
+
+			return 0;
 		}
 
 		std::cout << docStr << "\n";
@@ -145,12 +151,14 @@ int main(int argc, char *argv[])
 
 	if (!mainArgx.compareArgs(mainArgx.getOptions(), mainArgx.getMainArgs()))
 	{
-		std::cout << "Argx: Unknown option `" + (mainArgx.getArgc() > 1 ? mainArgx.getMainArgs()[1] : "<UNKNOWN>") + "`\n";
+		int wrongArgPos = mainArgx.getWrongArgs(mainArgx.getMainArgs());
+
+		std::cout << "[ ARGX ] Unknown option or sub-option: " << mainArgx.getMainArgs()[wrongArgPos] << "\n";
 
 		return 1;
 	}
 
 	return 0;
-#endif
+#endif // defined(AS_PYTHON_PACKAGE)
 }
 
