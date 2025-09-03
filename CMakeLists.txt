@@ -10,7 +10,7 @@ string(JSON PROJECT_VERSION_STD GET "${PROJECT_INFO}" versionSTD)
 project(${PROJECT_NAME} VERSION ${PROJECT_VERSION} LANGUAGES CXX)
 
 # Project settings
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS off)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -39,7 +39,6 @@ set(SOURCES
 )
 
 # NOTE: ADD FOLLOWING WHEN NOT DEVELOPING IN CHROMEOS
-# -fsanitize=address,leak>
 # Function to configure common target properties
 function(configure_target TARGET_NAME)
     target_include_directories(${TARGET_NAME}
@@ -49,12 +48,12 @@ function(configure_target TARGET_NAME)
     )
     
     target_compile_options(${TARGET_NAME} PRIVATE
-        $<$<CONFIG:DEBUG>:-g;-Og;-Wall;-Wextra;-Wpedantic;>
+        $<$<CONFIG:DEBUG>:-g;-Og;-Wall;-Wextra;-Wpedantic;-fsanitize=address,leak>
         $<$<CONFIG:RELEASE>:-O3;-march=native;-DNDEBUG>
     )
     
     target_link_options(${TARGET_NAME} PRIVATE
-        $<$<CONFIG:DEBUG>:>
+        $<$<CONFIG:DEBUG>:-fsanitize=address,leak>
     )
 endfunction()
 
