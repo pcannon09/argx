@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "../inc/macros.hpp"
+#include "macros.hpp"
 
-#if __cplusplus >= 201103L || defined(ARGX_AS_PYTHON_PACKAGE)
+#if __cplusplus >= 201402L || defined(ARGX_AS_PYTHON_PACKAGE)
 #include <string>
 #include <vector>
 
@@ -49,6 +49,10 @@ namespace argx
 #endif
 
 		Argx();
+
+		/**
+		 * @brief Deconstruct allocated objects
+		 */
 		~Argx();
 
 		/**
@@ -81,7 +85,16 @@ namespace argx
 		std::string createDocs(ARGXStyle style, const std::string &title, const std::string &mainInfo);
 
 		/**
-		 * @brief Find parameter index
+		 * @brief Normal parameter or sub-paramter to its corresponding ID
+		 * @param param Parameter value or name
+		 * @return std::string ID of the param or sub-param
+		 */
+		std::string paramToID(const std::string &param);
+
+		/**
+		 * @brief Find parameter and sub-parameter index
+		 * @param id ID to find
+		 * @return int Index
 		 */
 		int findParam(const std::string& id);
 
@@ -92,11 +105,40 @@ namespace argx
 		int getArgc() const;
 
 		/**
+		 * @brief Get argument using ID
+		 * @param arg Argument to find
+		 * @return int Argument position
+		 */
+		int getArgIDPos(const std::string &arg);
+
+		/**
+		 * @brief Get the incorrect arguments and sub-arguments that were not registered
+		 * @param argv Main arguments from argv
+		 * @return int Argument position
+		 */
+		int getWrongArgs(const std::vector<std::string> &argv);
+
+		/**
 		 * @brief Get if param exists in the param options
 		 * @param id ID to get
 		 * @return bool
 		 */
 		bool paramExists(const std::string &id);
+
+		/**
+		 * @brief Check if the `tag` exists in option with ID of `id`
+		 * @param id ID from option
+		 * @param tag Tag to find
+		 * @return bool Return false if there is no match, else, return true
+		 */
+		bool hasTag(const std::string &id, const std::string &tag);
+
+		/**
+		 * @brief Get if sub-param exists in the param options
+		 * @param id ID to get
+		 * @return bool
+		 */
+		bool subParamExists(const std::string &id);
 
 		/**
 		 * @brief Compare if `options` contains the required `id`, if the ID does not exist, return false
@@ -107,12 +149,26 @@ namespace argx
 		bool compareArgs(std::vector<ARGXOptions> options, std::vector<std::string> argv);
 
 		/**
+		 * @brief Get Options from specified ID
+		 * @param id ID to find
+		 * @param ARGXOptions Option information
+		 */
+		ARGXOptions getOption(const std::string &id);
+
+		/**
 		 * @brief Get the sub-param from `id`
 		 * @param param Original param
 		 * @param id The ID to get
 		 * @return bool
 		 */
 		bool getSubParam(const argx::ARGXParam &param, const std::string &id);
+
+		/**
+		 * @brief Get sub-parameter values, starting from the first value found until the first found value that corresponds to a registered parameter
+		 * @param id ID to find to get sub-value
+		 * @return std::vector<std::string> Values found from first to last
+		 */
+		std::vector<std::string> getSubValue(const std::string &id);
 
 		/**
 		 * @brief Get main arguments from `main()` function `argv`
@@ -135,6 +191,6 @@ namespace argx
 }
 
 #else
-# 	error "Must compile with C++11 support or newer"
+# 	error "Must compile with C++14 support or newer"
 # 	pragma message("Current standard is " ARGX_TOSTRING(__cplusplus))
 #endif

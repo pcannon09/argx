@@ -5,7 +5,7 @@
 #include <string>
 #include <codecvt>
 #include <locale>
-#include <algorithm>
+#include <iostream>
 
 #include "../inc/Argx.hpp"
 #include "../inc/types.hpp"
@@ -47,28 +47,48 @@ namespace argx
 		delete this->mainArgs; this->mainArgs = nullptr;
 	}
 
+	int Argx::getArgIDPos(const std::string &arg)
+	{
+		ARGXOptions option = this->getOption(arg);
+		
+		int argPos = this->getArgPos(option.param);
+		int shortArgPos = this->getArgPos(option.sparam);
+
+		if (argPos >= 0) return argPos;
+		if (shortArgPos >= 0) return shortArgPos;
+
+		return -1;
+	}
+
+	std::string Argx::paramToID(const std::string &param)
+	{
+		std::string id;
+
+		for (const auto &option : this->options)
+		{
+			if (option.param == param || option.sparam == param)
+				return option.id;
+		}
+
+		return id;
+	}
+
 	int Argx::getArgPos(const std::string &arg)
 	{
 		if (!this->mainArgs)
-			return -1;
+			return -2;
 
 		for (size_t i = 0; i < this->mainArgs->size(); ++i)
 		{
 			if (this->mainArgs->at(i) == arg)
-				return static_cast<int>(i);
+				return i;
 		}
 
 		return -1;
 	}
 
 	void Argx::add(ARGXOptions option) const
-	{
-		ARGXError error;
-		error.type = "success";
-		error.code = 0;
-
-		this->options.emplace_back(option);
-	}
+	{ this->options.emplace_back(option); }
 
 	int Argx::findParam(const std::string &id)
 	{
@@ -118,13 +138,33 @@ namespace argx
 
 	bool Argx::paramExists(const std::string &id)
 	{
-		if (this->findParam(id) >= 0) return true;;
+		if (this->findParam(id) >= 0) return true;
 
 		return false;
 	}
 
+	bool Argx::subParamExists(const std::string &id)
+	{
+		for (const auto &p : this->options)
+		{
+			if (p.sparam == id) return true;
+		}
+		
+		return false;
+	}
 
-	
+	bool Argx::hasTag(const std::string &id, const std::string &tag)
+	{
+		int paramID = this->findParam(id);
+
+		if (paramID < 0) return false;
+		
+		// Validate if tag from options is equal to this tag from function param
+		if (this->options[paramID].tag == tag) return true;
+
+		return false;
+	}
+
 	ARGXParam Argx::getParam(const std::string &id)
 	{
 		if (this->mainArgc <= 1) return {};
@@ -199,7 +239,7 @@ namespace argx
 				{
 					if (sub.id == id)
 					{
-						for (size_t i = parentPos + 1; i < this->mainArgs->size(); ++i)
+						for (size_t i = parentPos + 1 ; i < this->mainArgs->size(); ++i)
 						{
 							if ((*this->mainArgs)[i] == sub.param || (*this->mainArgs)[i] == sub.sparam)
 							{
@@ -315,10 +355,66 @@ namespace argx
 		return title + "\n" + mainInfo + "\n" + contentStr;
 	}
 
-	
+	int Argx::getWrongArgs(const std::vector<std::string> &argv)
+	{
+    	size_t pos = 1; // Skip program name
+
+    	while (pos < argv.size())
+    	{
+        	const auto &arg = argv[pos];
+        	bool recognized = false;
+
+        	for (const auto &opt : this->options)
+        	{
+            	if (arg == opt.param || arg == opt.sparam)
+            	{
+                	recognized = true;
+
+                	// Skip all subparams if they exist
+                	if (opt.hasSubParams || opt.hasAnySubParams)
+                	{
+                    	// Count subparams that actually exist in argv
+                    	for (size_t sub = 1; sub + pos < argv.size(); ++sub)
+                    	{
+                        	const std::string &nextArg = argv[pos + sub];
+
+                        	// If nextArg matches one of the defined subParams, skip it
+                        	bool isSub = false;
+
+                        	for (const auto &subOpt : opt.subParams)
+                        	{
+                            	if (nextArg == subOpt.param || nextArg == subOpt.sparam)
+                            	{
+                                	isSub = true;
+
+                                	break;
+                            	}
+                        	}
+
+                        	if (!isSub) break;
+
+                        	++pos; // Skip this subparam
+                    	}
+                	}
+
+                	break; // stop checking options
+            	}
+        	}
+
+        	if (!recognized)
+        	{
+            	return (int)pos;
+        	}
+
+        	++pos;
+    	}
+
+    	return -1;
+	}
+
 	bool Argx::compareArgs(std::vector<ARGXOptions> options, std::vector<std::string> argv)
 	{
-    	for (size_t i = 1; i < argv.size(); ++i)
+    	for (size_t i = 1 ; i < argv.size(); ++i)
     	{
         	const std::string &arg = argv[i];
 
@@ -377,6 +473,64 @@ namespace argx
     	}
 
     	return true;
+	}
+
+	ARGXOptions Argx::getOption(const std::string &id)
+	{
+		for (const auto &x : this->options)
+			if (x.id == id) return x;
+
+		return {};
+	}
+
+	std::vector<std::string> Argx::getSubValue(const std::string &id)
+	{
+		// Use `Argx::getArgPos()` function for sub-params
+		size_t idPos = this->getArgPos(id) + 1;
+
+		if (idPos < 0 || idPos == std::string::npos)
+			return {this->getOption(id).defaultValue};
+
+		std::vector<std::string> values;
+
+		for (size_t i = idPos ; i < this->getMainArgs().size() ; i++)
+		{
+			// End of the sub-parameter finding
+			// Assume the search is done due to an existsing sub-param
+			if (i != idPos && this->subParamExists(this->getMainArgs()[i]))
+				break;
+
+			values.emplace_back(this->getMainArgs()[i]);
+		}
+
+		std::string defaultValue;
+
+		{
+			bool breakOut = false;
+
+			for (size_t i = 0; i < this->mainArgs->size(); ++i)
+			{
+				for (size_t j = 0 ; j < this->options.size() ; ++j)
+				{
+					if (this->options[i].subParams[j].id == id)
+					{
+						defaultValue = this->options[i].subParams[j].defaultValue;
+
+
+						breakOut = true;
+
+						break;
+					}
+				}
+
+				if (breakOut) break;
+			}
+		}
+
+		if (values.empty())
+			values.emplace_back(defaultValue);
+
+		return values;
 	}
 
 	std::vector<std::string> Argx::getMainArgs() const
