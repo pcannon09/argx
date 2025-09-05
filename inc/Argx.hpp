@@ -55,6 +55,8 @@ namespace argx
 		 */
 		~Argx();
 
+		static int formatWrongArgs(const int &_int);
+
 		/**
 		 * @brief Get argument position with specified `arg`
 		 * @param arg Find argument

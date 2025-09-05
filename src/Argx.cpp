@@ -355,120 +355,211 @@ namespace argx
 		return title + "\n" + mainInfo + "\n" + contentStr;
 	}
 
+	// int Argx::getWrongArgs(const std::vector<std::string> &argv)
+	// {
+	// 	int pos = 1;
+	// 	bool isNormalParam = true;
+	//
+	// 	for (unsigned int i = 1 ; i < argv.size() ; ++i)
+	// 	{
+	// 		const auto arg = argv[pos];
+	//
+	// 		pos = i;
+	//
+	// 		if (this->options.size() > i)
+	// 		{
+	// 			if (this->options[i].param == arg || this->options[i].sparam == arg)
+	// 			{
+	// 				if (this->options[i].hasSubParams || this->options[i].hasAnySubParams)
+	// 				{
+	// 					isNormalParam = false;
+	//
+	// 					break;
+	// 				}
+	// 			}
+	//
+	// 			else break;
+	// 		}
+	// 	}
+	//
+	// 	// if (this->mainArgs->size() > 2)
+	// 	// 	if (isNormalParam) return 1;
+	//
+	// 	return (isNormalParam ? pos : -pos);
+	// }
+
+	// Replace your existing getWrongArgs(...) with this (signature unchanged)
 	int Argx::getWrongArgs(const std::vector<std::string> &argv)
 	{
-    	size_t pos = 1; // Skip program name
+    	int pos = 1; // skip program name
+    	bool isNormalParam = true;
 
-    	while (pos < argv.size())
+    	while (pos < (int)argv.size())
     	{
-        	const auto &arg = argv[pos];
-        	bool recognized = false;
+        	const std::string &arg = argv[pos];
+
+        	// Find matching top-level option
+        	const ARGXOptions *matched = nullptr;
 
         	for (const auto &opt : this->options)
         	{
             	if (arg == opt.param || arg == opt.sparam)
             	{
-                	recognized = true;
+                	matched = &opt;
+                	break;
+            	}
+        	}
+            
+            // unknown top-level arg
+        	if (!matched) return (isNormalParam ? pos : -pos);
 
-                	// Skip all subparams if they exist
-                	if (opt.hasSubParams || opt.hasAnySubParams)
+        	// matched a top-level option
+        	isNormalParam = true;
+
+        	if (matched->hasSubParams || matched->hasAnySubParams)
+        	{
+            	isNormalParam = false;
+
+            	int scanPos = pos + 1;
+
+            	while (scanPos < (int)argv.size())
+            	{
+                	const std::string &nextArg = argv[scanPos];
+
+                	// Is it a declared subparam for this option?
+                	bool isSub = false;
+
+                	for (const auto &subOpt : matched->subParams)
                 	{
-                    	// Count subparams that actually exist in argv
-                    	for (size_t sub = 1; sub + pos < argv.size(); ++sub)
+                    	if (nextArg == subOpt.param || nextArg == subOpt.sparam)
                     	{
-                        	const std::string &nextArg = argv[pos + sub];
-
-                        	// If nextArg matches one of the defined subParams, skip it
-                        	bool isSub = false;
-
-                        	for (const auto &subOpt : opt.subParams)
-                        	{
-                            	if (nextArg == subOpt.param || nextArg == subOpt.sparam)
-                            	{
-                                	isSub = true;
-
-                                	break;
-                            	}
-                        	}
-
-                        	if (!isSub) break;
-
-                        	++pos; // Skip this subparam
+                        	isSub = true;
+                        	break;
                     	}
                 	}
 
-                	break; // stop checking options
-            	}
-        	}
+                	if (isSub)
+                	{
+                    	// Consume that subparam and continue scanning
+                    	pos = scanPos;
+                    	++scanPos;
 
-        	if (!recognized)
-        	{
-            	return (int)pos;
+                    	continue;
+                	}
+
+                	// If not a subparam, is it a global option? (do **NOT** consume it)
+                	bool isGlobalOpt = false;
+
+                	for (const auto &globalOpt : this->options)
+                	{
+                    	if (nextArg == globalOpt.param || nextArg == globalOpt.sparam)
+                    	{
+                        	isGlobalOpt = true;
+
+                        	break;
+                    	}
+                	}
+
+                    // valid global option follows; stop subparam scan and let outer loop handle it
+                	if (isGlobalOpt) break;
+
+                	// neither subparam nor global option; it's an invalid sub-parameter token
+                	return -scanPos;
+            	}
         	}
 
         	++pos;
     	}
 
-    	return -1;
+    	// If nothing wrong found; return your existing success codes
+    	if (isNormalParam) return (this->mainArgs->size() > 2 ? 2 : 1);
+    	else return (this->mainArgs->size() > 2 ? -2 : -1);
+	}
+
+	int Argx::formatWrongArgs(const int &_int)
+	{
+		if (_int < 0) return -_int; // Convert to unsigned SAFELY
+
+		return _int;
 	}
 
 	bool Argx::compareArgs(std::vector<ARGXOptions> options, std::vector<std::string> argv)
 	{
-    	for (size_t i = 1 ; i < argv.size(); ++i)
+    	// iterate over argv and skip program name
+    	for (size_t i = 1; i < argv.size(); ++i)
     	{
         	const std::string &arg = argv[i];
 
-        	bool found = false;
-        	bool hasSubParams = false;
-        	bool hasAnySubParams = false;
+        	// find a matching top-level option
+        	const ARGXOptions *matched = nullptr;
 
-        	ARGXOptions matchedOption;
-
-        	// Find the matching option
-        	for (const auto &option : options)
+        	for (const auto &opt : options)
         	{
-            	if (option.sparam == arg || option.param == arg)
+            	if (opt.sparam == arg || opt.param == arg)
             	{
-                	found = true;
-                	hasSubParams = option.hasSubParams;
-					hasAnySubParams = option.hasAnySubParams;
-                	matchedOption = option;
+                	matched = &opt;
 
                 	break;
             	}
         	}
 
-        	if (!found) return false;
+			// No matched top-level option
+        	if (!matched) return false;
 
-        	if (hasSubParams || hasAnySubParams)
+        	// if option supports subparams, try to get them
+        	if (matched->hasSubParams || matched->hasAnySubParams)
         	{
-            	// Check if there's a next argument
-            	if (i + 1 < argv.size())
+            	size_t j = i + 1;
+
+            	while (j < argv.size())
             	{
-                	const std::string &nextArg = argv[i + 1];
+                	const std::string &next = argv[j];
 
-                	// Check if next argument is a sub-parameter
-                	bool isSubParam = false;
+                	// Check the next declared subparam of `matched`
+                	bool isSub = false;
 
-                	if (!nextArg.empty() && nextArg[0] != '-')
+                	for (const auto &sub : matched->subParams)
                 	{
-                    	// Validate if it's a valid sub-parameter
-                    	for (const auto &subOption : matchedOption.subParams)
+                    	if (next == sub.param || next == sub.sparam)
                     	{
-                        	if (subOption.param == nextArg || subOption.sparam == nextArg)
-                        	{
-                            	isSubParam = true;
+                        	isSub = true;
 
-                            	break;
-                        	}
+                        	break;
                     	}
-
-                    	if (isSubParam) ++i; // Get the sub-parameter
-                   		else if (hasSubParams || hasAnySubParams) return false;
                 	}
 
-                	else if (hasSubParams || hasAnySubParams) return false;
-				}
+                    // Get it and continue scanning for more subparams
+                	if (isSub)
+                	{
+                    	++j;
+
+                    	continue;
+                	}
+
+                	// not a subparam then check if it's a known top-level option
+                	bool isGlobal = false;
+
+                	for (const auto &g : options)
+                	{
+                    	if (next == g.param || next == g.sparam)
+                    	{
+                        	isGlobal = true;
+                        	break;
+                    	}
+                	}
+
+
+                    // stop scanning subparams; outer loop will handle this global option
+                	if (isGlobal) break;
+
+                	// neither a subparam nor a global option to an invalid sequence
+                	return false;
+            	}
+
+            	// advance outer index to the last consumed token ( j - 1 ).
+            	// outer for-loop will increment i, so set `i = j - 1` to continue at j
+            	if (j > i + 1)
+                	i = j - 1;
         	}
     	}
 
@@ -512,14 +603,17 @@ namespace argx
 			{
 				for (size_t j = 0 ; j < this->options.size() ; ++j)
 				{
-					if (this->options[i].subParams[j].id == id)
+					if (this->options[i].subParams.size() > j)
 					{
-						defaultValue = this->options[i].subParams[j].defaultValue;
+						if (this->options[i].subParams[j].id == id)
+						{
+							defaultValue = this->options[i].subParams[j].defaultValue;
 
 
-						breakOut = true;
+							breakOut = true;
 
-						break;
+							break;
+						}
 					}
 				}
 
