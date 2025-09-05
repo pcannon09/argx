@@ -66,17 +66,17 @@ int main(int argc, char *argv[])
 		messageSubOption.defaultValue = "Hello world!";
 		messageSubOption.hasSubParams = false;
 
- 		styleSubOption.id = "simple";
+ 		styleSubOption.id = "style-type";
  		styleSubOption.param = "simple";
- 		styleSubOption.info = "Set simple documentation";
+ 		styleSubOption.info = "Set simple documentation style";
  		styleSubOption.hasSubParams = false;
 
 		styleOption.subParams.push_back(styleSubOption);
 
- 		styleSubOption.id = "simple";
+ 		styleSubOption.id = "style-type";
  		styleSubOption.param = "professional";
  		styleSubOption.sparam = "pro";
- 		styleSubOption.info = "Set professional documentation";
+ 		styleSubOption.info = "Set professional documentation style";
  		styleSubOption.hasSubParams = false;
 
 		styleOption.subParams.push_back(styleSubOption);
@@ -98,10 +98,14 @@ int main(int argc, char *argv[])
 
 		if (mainArgx.getParam("style").exists)
 		{
-			if (mainArgx.getArgc() > 2)
+			if (mainArgx.getArgc() > mainArgx.getArgIDPos("style") + 1)
 			{
-				if (mainArgx.getMainArgs()[2] == "simple") docStr = mainArgx.createDocs(argx::ARGXStyle::Simple, "-- Docs ----", msg);
-				else docStr = mainArgx.createDocs(argx::ARGXStyle::Professional, "-- Docs ----", msg);
+				if (mainArgx.getMainArgs()[mainArgx.getArgIDPos("style") + 1] == "simple")
+					docStr = mainArgx.createDocs(argx::ARGXStyle::Simple, "-- Docs ----", msg);
+
+				else if (mainArgx.getMainArgs()[mainArgx.getArgIDPos("style") + 1] == "pro" ||
+						mainArgx.getMainArgs()[mainArgx.getArgIDPos("style") + 1] == "professional")
+					docStr = mainArgx.createDocs(argx::ARGXStyle::Professional, "-- Docs ----", msg);
 			}
 
 			else
@@ -143,7 +147,7 @@ int main(int argc, char *argv[])
 			return 0;
 		}
 
-		std::cout << docStr << "\n";
+		std::cout << docStr << "\n" << licenseStr << "\n";
 	}
 
 	if (mainArgx.getParam("version").exists)
@@ -158,7 +162,10 @@ int main(int argc, char *argv[])
 	{
 		int wrongArgPos = mainArgx.getWrongArgs(mainArgx.getMainArgs());
 
-		std::cout << "[ ARGX ] Unknown option or sub-option: " << mainArgx.getMainArgs()[wrongArgPos] << "\n";
+		std::cout << argx::Argx::formatWrongArgs(wrongArgPos) << "\n";
+
+		std::cout << "[ ARGX ] Unknown option " << mainArgx.getMainArgs()[argx::Argx::formatWrongArgs(wrongArgPos)] << "\n";
+		std::cout << "[ ARGX ] Had a param error as " << (wrongArgPos >= 0 ? "normal parameter" : "sub parameter") << "\n";
 
 		return 1;
 	}
