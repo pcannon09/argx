@@ -11,7 +11,7 @@
 #define ARGX_VERSION_PATCH              2
 
 #define ARGX_VERSION_STD                20250903
-#define ARGX_PY_REQUIRED_VERSION_STD    20250721
+#define ARGX_PY_REQUIRED_VERSION_STD    20250903
 
 // Version states:
 // * dev                    0
