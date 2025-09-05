@@ -5,7 +5,7 @@
 #include <string>
 #include <codecvt>
 #include <locale>
-#include <algorithm>
+#include <iostream>
 
 #include "../inc/Argx.hpp"
 #include "../inc/types.hpp"
@@ -36,6 +36,9 @@ namespace argx
 	{
         this->mainArgs = new std::vector<std::string>(argv, argv + argc);
         this->mainArgc = argc;
+
+        if (!this->mainArgs)
+			std::cerr << "`Argx::mainArgs` for ID of " + id + " does not exist (NULL value)";
 	}
 #endif
 
@@ -44,7 +47,7 @@ namespace argx
 
 	Argx::~Argx()
 	{
-		delete this->mainArgs; this->mainArgs = nullptr;
+		if (this->mainArgs) delete this->mainArgs; this->mainArgs = nullptr;
 	}
 
 	int Argx::getArgPos(const std::string &arg)
