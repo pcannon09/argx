@@ -1,4 +1,4 @@
-# ARGX - 1.2.0-beta
+# ARGX - 1.2.1-build
 ## C++ Argument parser
 ### Made by: pcannon09
 
@@ -8,16 +8,16 @@
 ### Compiler and C++ Standard Support
 | Argx Version  	   | Minimum C++ Standard |     GCC     |    Clang    |               MSVC               |
 |:--------------------:|:--------------------:|:-----------:|:-----------:|:--------------------------------:|
-| 1.2.0-beta 		   | C++14                | GCC 5.1+    | Clang 3.4+  | MSVC 14.0+ (/std:c++11 or later) |
-| 1.1.0-build          | C++11                | GCC 4.8+    | Clang 3.3+  | MSVC 11.0+ (/std:c++11 or later) |
-| 1.0.0-build          | C++11                | GCC 4.8+    | Clang 3.3+  | MSVC 11.0+ (/std:c++11 or later) |
+| 1.2.y-build 		   | C++14                | GCC 5.1+    | Clang 3.4+  | MSVC 14.0+ (/std:c++11 or later) |
+| 1.1.y-build          | C++11                | GCC 4.8+    | Clang 3.3+  | MSVC 11.0+ (/std:c++11 or later) |
+| 1.0.y-build          | C++11                | GCC 4.8+    | Clang 3.3+  | MSVC 11.0+ (/std:c++11 or later) |
 
 ### Specific information
-**NOTE: For version 1.2.0-beta**
+**NOTE: For version 1.2.y-build**
 * Minimum standard required to compile as for latest version: **C++14** (**GCC 5.1+**, **Clang 3.4+** and **MSVC 14.0+**)
 
 ### Summary
-* The minimum required version for Argx 1.2.0-beta is C++ for **GCC 5.1+**, **Clang 3.4+** and **MSVC 14.0+**
+* The minimum required version for Argx 1.2.y-build is C++ for **GCC 5.1+**, **Clang 3.4+** and **MSVC 14.0+**
 
 ## IMPORTANT NOTES
 **This library has been tested in Arch Linux, please open an issue if you encounter a problem with other Operating Systems**
