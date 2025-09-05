@@ -6,7 +6,7 @@
 
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Argx"
-PROJECT_NUMBER         = 1.2.0-beta
+PROJECT_NUMBER         = 1.2.2-build
 PROJECT_BRIEF          = "Simple yet powerful argument parser made in C++"
 OUTPUT_DIRECTORY       = docs/
 CREATE_SUBDIRS         = YES
