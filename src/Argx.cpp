@@ -36,6 +36,9 @@ namespace argx
 	{
         this->mainArgs = new std::vector<std::string>(argv, argv + argc);
         this->mainArgc = argc;
+
+        if (!this->mainArgs)
+        	std::cerr << "`Args::mainArgs` is not valid for ID of " + id + " variable is NULL";
 	}
 #endif
 
@@ -44,7 +47,7 @@ namespace argx
 
 	Argx::~Argx()
 	{
-		delete this->mainArgs; this->mainArgs = nullptr;
+		if (this->mainArgs) { delete this->mainArgs; this->mainArgs = nullptr; }
 	}
 
 	int Argx::getArgIDPos(const std::string &arg)
