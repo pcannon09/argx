@@ -8,7 +8,7 @@
 // Versioning
 #define ARGX_VERSION_MAJOR              1
 #define ARGX_VERSION_MINOR              2
-#define ARGX_VERSION_PATCH              0
+#define ARGX_VERSION_PATCH              1
 
 #define ARGX_VERSION_STD                20250903
 #define ARGX_PY_REQUIRED_VERSION_STD    20250721
